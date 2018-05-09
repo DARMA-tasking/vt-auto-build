@@ -80,10 +80,13 @@ sub get_args {
     my $meld_path = "$root_dir/meld/meld-install";
     my $vt_path = "$root_dir/vt/vt-install";
     my $frontend_path = "$root_dir/frontend/frontend-install";
+    my $backend_path = "$root_dir/backend/backend-install";
     if ($repo eq "checkpoint") {
         return "1 $detector_path $gtest";
     } elsif ($repo eq "backend") {
         return "$vt_path $frontend_path $fmt_path";
+    } elsif ($repo eq "examples") {
+        return "$frontend_path $backend_path";
     } elsif ($repo eq "vt") {
         my $dpath = $detector_path;
         my $cpath = $checkpoint_path;
@@ -112,7 +115,7 @@ sub build_install {
     system "git clone $repo_path $src_dir" if (!(-e $src_dir));
     my $prefix_cd = "cd $build_dir &&";
     my $args = &get_args($repo);
-    if ($repo eq "frontend") {
+    if ($repo eq "frontend" || $repo eq "examples") {
         system "$prefix_cd $cur_dir/build-$repo.sh $build_mode $args";
     } elsif ($repo eq "vt") {
         #print "$prefix_cd $src_dir/scripts/build_$repo.pl $args";

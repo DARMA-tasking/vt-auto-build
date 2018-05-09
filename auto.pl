@@ -45,7 +45,8 @@ my %repos = (
     'meld'       => qw(darma-mpi-backend/meld.git),
     'checkpoint' => qw(darma-mpi-backend/checkpoint.git),
     'backend'    => qw(darma-mpi-backend/darma-backend.git),
-    'frontend'   => qw(DARMA-tasking/darma-frontend.git)
+    'frontend'   => qw(DARMA-tasking/darma-frontend.git),
+    'examples'   => qw(DARMA-tasking/darma-examples.git)
 );
 
 my @repo_install_order = (
@@ -54,7 +55,8 @@ my @repo_install_order = (
     'checkpoint',
     'vt',
     'frontend',
-    'backend'
+    'backend',
+    'examples'
 );
 
 print "auto build: root=$root_dir, prefix=$prefix\n";

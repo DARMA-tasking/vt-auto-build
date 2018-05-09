@@ -73,12 +73,19 @@ sub create_dir {
 
 sub get_args {
     my $repo = shift;
+    my $detector_path = "$root_dir/detector/detector-install";
+    my $checkpoint_path = "$root_dir/checkpoint/checkpoint-install";
+    my $meld_path = "$root_dir/meld/meld-install";
+    my $vt_path = "$root_dir/vt/vt-install";
+    my $frontend_path = "$root_dir/frontend/frontend-install";
     if ($repo eq "checkpoint") {
-        return "1 $root_dir/detector/detector-install $gtest";
+        return "1 $detector_path $gtest";
+    } elsif ($repo eq "backend") {
+        return "$vt_path $frontend_path $fmt_path";
     } elsif ($repo eq "vt") {
-        my $dpath = "$root_dir/detector/detector-install";
-        my $cpath = "$root_dir/checkpoint/checkpoint-install";
-        my $mpath = "$root_dir/meld/meld-install";
+        my $dpath = $detector_path;
+        my $cpath = $checkpoint_path;
+        my $mpath = $meld_path;
         return
             "build_mode=$build_mode " .
             "compiler=$compiler " .

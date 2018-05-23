@@ -49,6 +49,16 @@ my %repos = (
     'examples'   => qw(DARMA-tasking/darma-examples.git)
 );
 
+my %repos_branch = (
+    'vt'         => qw(develop),
+    'detector'   => qw(master),
+    'meld'       => qw(master),
+    'checkpoint' => qw(master),
+    'backend'    => qw(develop),
+    'frontend'   => qw(23e2f9),
+    'examples'   => qw(devel)
+);
+
 my @repo_install_order = (
     'meld',
     'detector',
@@ -113,6 +123,8 @@ sub build_install {
     my $repo_path = "$github_prefix/$repos{$repo}";
     print "Cloning $repo_path...\n";
     system "git clone $repo_path $src_dir" if (!(-e $src_dir));
+    system "cd $src_dir && git checkout $repos_branch{$repo}";
+    #print "XXX: cd $src_dir && git checkout $repos_branch{$repo}\n";
     my $prefix_cd = "cd $build_dir &&";
     my $args = &get_args($repo);
     if ($repo eq "frontend" || $repo eq "examples") {

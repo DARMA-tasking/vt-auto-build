@@ -8,8 +8,8 @@ use lib dirname (__FILE__);
 
 require "args.pl";
 
-my ($build_mode,$compiler,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
-my $backend;
+my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
+my ($backend,$compiler_c,$compiler_cxx);
 my ($par,$clean,$dry_run,$verbose);
 
 my $arg = Args->new();
@@ -23,7 +23,8 @@ sub clean_dir {
 my $cur_dir = clean_dir `pwd`;
 
 $arg->add_required_arg("build_mode",  \$build_mode);
-$arg->add_optional_arg("compiler",    \$compiler,        "");
+$arg->add_optional_arg("compiler_c",  \$compiler_c,      "");
+$arg->add_optional_arg("compiler_cxx",\$compiler_cxx,    "");
 $arg->add_optional_arg("root_dir",    \$root_dir,        $cur_dir);
 $arg->add_optional_arg("build_tests", \$build_all_tests, 1);
 $arg->add_optional_arg("fmt",         \$fmt_path,        "");
@@ -94,24 +95,27 @@ sub get_args {
     my $frontend_path = "$root_dir/frontend/frontend-install";
     my $backend_path = "$root_dir/backend/backend-install";
     if ($repo eq "checkpoint") {
-        return "1 $detector_path $gtest $compiler";
+        return "1 $detector_path $gtest $compiler_c $compiler_cxx";
     } elsif ($repo eq "backend") {
         return "$vt_path $frontend_path $fmt_path";
     } elsif ($repo eq "detector" || $repo eq "meld") {
-        return "$compiler";
+        return "$compiler_c $compiler_cxx";
     } elsif ($repo eq "examples") {
         return "$frontend_path $backend_path";
     } elsif ($repo eq "vt") {
         my $dpath = $detector_path;
         my $cpath = $checkpoint_path;
         my $mpath = $meld_path;
-        my $vtcompiler = "";
-        if ($compiler eq "") {
-            $vtcompiler = "clang";
+        my $compiler_str = "";
+        if ($compiler_c neq "") {
+            $compiler_str .= "compiler_c=${compiler_c} "
+        }
+        if ($compiler_cxx neq "") {
+            $compiler_str .= "compiler_cxx=${compiler_cxx} "
         }
         return
             "build_mode=$build_mode " .
-            "compiler=$vtcompiler " .
+            $compiler_str .
             "build_tests=$build_all_tests " .
             "detector=$dpath " .
             "meld=$mpath " .

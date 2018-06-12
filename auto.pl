@@ -23,7 +23,7 @@ sub clean_dir {
 my $cur_dir = clean_dir `pwd`;
 
 $arg->add_required_arg("build_mode",  \$build_mode);
-$arg->add_required_arg("compiler",    \$compiler);
+$arg->add_required_arg("compiler",    \$compiler,        "");
 $arg->add_optional_arg("root_dir",    \$root_dir,        $cur_dir);
 $arg->add_optional_arg("build_tests", \$build_all_tests, 1);
 $arg->add_optional_arg("fmt",         \$fmt_path,        "");
@@ -94,9 +94,11 @@ sub get_args {
     my $frontend_path = "$root_dir/frontend/frontend-install";
     my $backend_path = "$root_dir/backend/backend-install";
     if ($repo eq "checkpoint") {
-        return "1 $detector_path $gtest";
+        return "1 $detector_path $gtest $compiler";
     } elsif ($repo eq "backend") {
         return "$vt_path $frontend_path $fmt_path";
+    } elsif ($repo eq "detector" || $repo eq "meld") {
+        return "$compiler";
     } elsif ($repo eq "examples") {
         return "$frontend_path $backend_path";
     } elsif ($repo eq "vt") {

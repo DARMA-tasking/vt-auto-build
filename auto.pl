@@ -95,7 +95,11 @@ sub get_args {
     my $frontend_path = "$root_dir/frontend/frontend-install";
     my $backend_path = "$root_dir/backend/backend-install";
     if ($repo eq "checkpoint") {
-        return "1 $detector_path $gtest $compiler_c $compiler_cxx";
+        my $build_test = "ON";
+        if (!$build_all_tests) {
+            $build_test = "OFF";
+        }
+        return "1 $detector_path $gtest $build_test $compiler_c $compiler_cxx";
     } elsif ($repo eq "backend") {
         return "$vt_path $frontend_path $fmt_path";
     } elsif ($repo eq "detector" || $repo eq "meld") {
@@ -107,14 +111,15 @@ sub get_args {
         my $cpath = $checkpoint_path;
         my $mpath = $meld_path;
         my $compiler_str = "";
-        if ($compiler_c neq "") {
-            $compiler_str .= "compiler_c=${compiler_c} "
+        if ($compiler_c ne "") {
+            $compiler_str = $compiler_str . "compiler_c=${compiler_c} "
         }
-        if ($compiler_cxx neq "") {
-            $compiler_str .= "compiler_cxx=${compiler_cxx} "
+        if ($compiler_cxx ne "") {
+            $compiler_str = $compiler_str . "compiler_cxx=${compiler_cxx} "
         }
-        return
+        my $str =
             "build_mode=$build_mode " .
+            "compiler=clang " .
             $compiler_str .
             "build_tests=$build_all_tests " .
             "detector=$dpath " .
@@ -122,6 +127,9 @@ sub get_args {
             "fmt=$fmt_path " .
             "gtest=$gtest " .
             "checkpoint=$cpath ";
+        print "compiler string=\"$compiler_str\"\n";
+        print "string=\"$str\"\n";
+        return $str;
     }
 }
 
@@ -143,6 +151,7 @@ sub build_install {
         system "$prefix_cd $cur_dir/build-$repo.sh $build_mode $args";
     } elsif ($repo eq "vt") {
         #print "$prefix_cd $src_dir/scripts/build_$repo.pl $args";
+        print "$prefix_cd $src_dir/scripts/build_$repo.pl $args\n";
         system "$prefix_cd $src_dir/scripts/build_$repo.pl $args";
     } else {
         system "$prefix_cd $src_dir/build-$repo.sh $build_mode $args";

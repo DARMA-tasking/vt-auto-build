@@ -105,9 +105,13 @@ sub get_args {
         my $dpath = $detector_path;
         my $cpath = $checkpoint_path;
         my $mpath = $meld_path;
+        my $vtcompiler = "";
+        if ($compiler eq "") {
+            $vtcompiler = "clang";
+        }
         return
             "build_mode=$build_mode " .
-            "compiler=$compiler " .
+            "compiler=$vtcompiler " .
             "build_tests=$build_all_tests " .
             "detector=$dpath " .
             "meld=$mpath " .

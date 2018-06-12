@@ -23,7 +23,7 @@ sub clean_dir {
 my $cur_dir = clean_dir `pwd`;
 
 $arg->add_required_arg("build_mode",  \$build_mode);
-$arg->add_required_arg("compiler",    \$compiler,        "");
+$arg->add_optional_arg("compiler",    \$compiler,        "");
 $arg->add_optional_arg("root_dir",    \$root_dir,        $cur_dir);
 $arg->add_optional_arg("build_tests", \$build_all_tests, 1);
 $arg->add_optional_arg("fmt",         \$fmt_path,        "");

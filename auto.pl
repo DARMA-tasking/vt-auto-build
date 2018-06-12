@@ -9,6 +9,7 @@ use lib dirname (__FILE__);
 require "args.pl";
 
 my ($build_mode,$compiler,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
+my $backend;
 my ($par,$clean,$dry_run,$verbose);
 
 my $arg = Args->new();
@@ -23,15 +24,16 @@ my $cur_dir = clean_dir `pwd`;
 
 $arg->add_required_arg("build_mode",  \$build_mode);
 $arg->add_required_arg("compiler",    \$compiler);
-$arg->add_optional_arg("root_dir",    \$root_dir, $cur_dir);
+$arg->add_optional_arg("root_dir",    \$root_dir,        $cur_dir);
 $arg->add_optional_arg("build_tests", \$build_all_tests, 1);
-$arg->add_optional_arg("fmt",         \$fmt_path, "");
-$arg->add_optional_arg("prefix",      \$prefix, "");
-$arg->add_optional_arg("par",         \$par, 8);
-$arg->add_optional_arg("dry_run",     \$dry_run, 0);
-$arg->add_optional_arg("verbose",     \$verbose, 0);
-$arg->add_optional_arg("gtest",       \$gtest, "");
-$arg->add_optional_arg("clean",       \$clean, 0);
+$arg->add_optional_arg("fmt",         \$fmt_path,        "");
+$arg->add_optional_arg("prefix",      \$prefix,          "");
+$arg->add_optional_arg("par",         \$par,             8);
+$arg->add_optional_arg("dry_run",     \$dry_run,         0);
+$arg->add_optional_arg("verbose",     \$verbose,         0);
+$arg->add_optional_arg("gtest",       \$gtest,           "");
+$arg->add_optional_arg("clean",       \$clean,           0);
+$arg->add_optional_arg("backend",     \$backend,         0);
 
 $arg->parse_arguments(@ARGV);
 
@@ -143,6 +145,9 @@ foreach my $repo (@repo_install_order) {
     my $base_dir = "$root_dir/$repo";
     #print "$repo: base=$base_dir\n";
     #next if ($repo ne 'meld');
+    next if $backend == 0 && $repo eq "backend";
+    next if $backend == 0 && $repo eq "frontend";
+    next if $backend == 0 && $repo eq "examples";
     if ($clean == 1) {
         &clean_repo($base_dir,$repo);
     } else {

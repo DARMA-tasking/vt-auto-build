@@ -10,7 +10,7 @@ require "args.pl";
 
 my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
 my ($backend,$compiler_c,$compiler_cxx);
-my ($par,$clean,$dry_run,$verbose);
+my ($par,$clean,$dry_run,$verbose, $atomic);
 
 my $arg = Args->new();
 
@@ -35,6 +35,7 @@ $arg->add_optional_arg("verbose",     \$verbose,         0);
 $arg->add_optional_arg("gtest",       \$gtest,           "");
 $arg->add_optional_arg("clean",       \$clean,           0);
 $arg->add_optional_arg("backend",     \$backend,         0);
+$arg->add_optional_arg("atomic",      \$atomic,          "");
 
 $arg->parse_arguments(@ARGV);
 
@@ -117,6 +118,10 @@ sub get_args {
         if ($compiler_cxx ne "") {
             $compiler_str = $compiler_str . "compiler_cxx=${compiler_cxx} "
         }
+	my $atomic_str = "";
+        if ($atomic ne "") {
+            $atomic_str = "atomic=true";
+        }
         my $str =
             "build_mode=$build_mode " .
             "compiler=clang " .
@@ -126,6 +131,7 @@ sub get_args {
             "meld=$mpath " .
             "fmt=$fmt_path " .
             "gtest=$gtest " .
+            "$atomic_str " .
             "checkpoint=$cpath ";
         print "compiler string=\"$compiler_str\"\n";
         print "string=\"$str\"\n";
@@ -154,6 +160,7 @@ sub build_install {
         print "$prefix_cd $src_dir/scripts/build_$repo.pl $args\n";
         system "$prefix_cd $src_dir/scripts/build_$repo.pl $args";
     } else {
+	print "$prefix_cd $src_dir/build-$repo.sh $build_mode $args\n";
         system "$prefix_cd $src_dir/build-$repo.sh $build_mode $args";
     }
     system "$prefix_cd make -j$par";

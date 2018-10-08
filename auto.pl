@@ -46,30 +46,21 @@ my %repos = (
     'vt'         => qw(darma-mpi-backend/vt.git),
     'detector'   => qw(darma-mpi-backend/detector.git),
     'meld'       => qw(darma-mpi-backend/meld.git),
-    'checkpoint' => qw(darma-mpi-backend/checkpoint.git),
-    'backend'    => qw(darma-mpi-backend/darma-backend.git),
-    'frontend'   => qw(DARMA-tasking/darma-frontend.git),
-    'examples'   => qw(DARMA-tasking/darma-examples.git)
+    'checkpoint' => qw(darma-mpi-backend/checkpoint.git)
 );
 
 my %repos_branch = (
     'vt'         => qw(develop),
     'detector'   => qw(master),
     'meld'       => qw(master),
-    'checkpoint' => qw(master),
-    'backend'    => qw(develop),
-    'frontend'   => qw(23e2f9),
-    'examples'   => qw(devel)
+    'checkpoint' => qw(master)
 );
 
 my @repo_install_order = (
     'meld',
     'detector',
     'checkpoint',
-    'vt',
-    'frontend',
-    'backend',
-    'examples'
+    'vt'
 );
 
 print "auto build: root=$root_dir, prefix=$prefix\n";

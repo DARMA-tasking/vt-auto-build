@@ -22,14 +22,14 @@ sub clean_dir {
 
 my $cur_dir = clean_dir `pwd`;
 
-$arg->add_required_arg("build_mode",  \$build_mode);
+$arg->add_required_arg("build_mode",  \$build_mode         );
 $arg->add_optional_arg("compiler_c",  \$compiler_c,      "");
 $arg->add_optional_arg("compiler_cxx",\$compiler_cxx,    "");
 $arg->add_optional_arg("root_dir",    \$root_dir,        $cur_dir);
 $arg->add_optional_arg("build_tests", \$build_all_tests, 1);
 $arg->add_optional_arg("fmt",         \$fmt_path,        "");
 $arg->add_optional_arg("prefix",      \$prefix,          "");
-$arg->add_optional_arg("par",         \$par,             8);
+$arg->add_optional_arg("par",         \$par,             14);
 $arg->add_optional_arg("dry_run",     \$dry_run,         0);
 $arg->add_optional_arg("verbose",     \$verbose,         0);
 $arg->add_optional_arg("gtest",       \$gtest,           "");
@@ -44,6 +44,8 @@ $root_dir = $root_dir . "/" . $prefix . "/";
 my $github_prefix = qw(git@github.com:);
 
 my %repos = (
+    'gtest'      => qw(google/googletest.git),
+    'fmt'        => qw(fmtlib/fmt.git),
     'vt'         => qw(darma-mpi-backend/vt.git),
     'detector'   => qw(darma-mpi-backend/detector.git),
     'meld'       => qw(darma-mpi-backend/meld.git),
@@ -51,6 +53,8 @@ my %repos = (
 );
 
 my %repos_branch = (
+    'gtest'      => qw(master),
+    'fmt'        => qw(master),
     'vt'         => qw(develop),
     'detector'   => qw(master),
     'meld'       => qw(master),
@@ -58,6 +62,8 @@ my %repos_branch = (
 );
 
 my @repo_install_order = (
+    'fmt',
+    'gtest',
     'meld',
     'detector',
     'checkpoint',
@@ -84,20 +90,14 @@ sub get_args {
     my $checkpoint_path = "$root_dir/checkpoint/checkpoint-install";
     my $meld_path = "$root_dir/meld/meld-install";
     my $vt_path = "$root_dir/vt/vt-install";
-    my $frontend_path = "$root_dir/frontend/frontend-install";
-    my $backend_path = "$root_dir/backend/backend-install";
     if ($repo eq "checkpoint") {
         my $build_test = "ON";
         if (!$build_all_tests) {
             $build_test = "OFF";
         }
         return "1 $detector_path $gtest $build_test $compiler_c $compiler_cxx";
-    } elsif ($repo eq "backend") {
-        return "$vt_path $frontend_path $fmt_path";
     } elsif ($repo eq "detector" || $repo eq "meld") {
         return "$compiler_c $compiler_cxx";
-    } elsif ($repo eq "examples") {
-        return "$frontend_path $backend_path";
     } elsif ($repo eq "vt") {
         my $dpath = $detector_path;
         my $cpath = $checkpoint_path;
@@ -109,7 +109,7 @@ sub get_args {
         if ($compiler_cxx ne "") {
             $compiler_str = $compiler_str . "compiler_cxx=${compiler_cxx} "
         }
-	my $atomic_str = "";
+        my $atomic_str = "";
         if ($atomic ne "") {
             $atomic_str = "atomic=true";
         }
@@ -127,6 +127,8 @@ sub get_args {
         print "compiler string=\"$compiler_str\"\n";
         print "string=\"$str\"\n";
         return $str;
+    } elsif ($repo eq "fmt" || $repo eq "gtest") {
+        return "$compiler_c $compiler_cxx";
     }
 }
 
@@ -138,33 +140,39 @@ sub build_install {
     &create_dir($build_dir);
     &create_dir($install_dir);
     my $repo_path = "$github_prefix/$repos{$repo}";
-    print "Cloning $repo_path...\n";
-    system "git clone $repo_path $src_dir" if (!(-e $src_dir));
-    system "cd $src_dir && git checkout $repos_branch{$repo}";
+    my $branch = "$repos_branch{$repo}";
+    my $git_cmd = "git clone --branch $branch --depth=1 $repo_path $src_dir";
+    print "\n";
+    print "=== Starting build/install of dependency: $repo ===\n";
+    print "=== Cloning $repo_path: $git_cmd ===\n";
+    system "$git_cmd" if (!(-e $src_dir));
+    system "cd $src_dir && git checkout $branch";
     #print "XXX: cd $src_dir && git checkout $repos_branch{$repo}\n";
     my $prefix_cd = "cd $build_dir &&";
     my $args = &get_args($repo);
-    if ($repo eq "frontend" || $repo eq "examples") {
-        system "$prefix_cd $cur_dir/build-$repo.sh $build_mode $args";
+    if ($repo eq "fmt" || $repo eq "gtest") {
+        system "$prefix_cd $cur_dir/build-$repo.sh Release $args";
     } elsif ($repo eq "vt") {
-        #print "$prefix_cd $src_dir/scripts/build_$repo.pl $args";
-        print "$prefix_cd $src_dir/scripts/build_$repo.pl $args\n";
-        system "$prefix_cd $src_dir/scripts/build_$repo.pl $args";
+        my $cmd = "$prefix_cd $src_dir/scripts/build_$repo.pl $args\n";
+        system $cmd;
     } else {
-	print "$prefix_cd $src_dir/build-$repo.sh $build_mode $args\n";
-        system "$prefix_cd $src_dir/build-$repo.sh $build_mode $args";
+        my $cmd = "$prefix_cd $src_dir/build-$repo.sh $build_mode $args";
+        system $cmd;
     }
     system "$prefix_cd make -j$par";
     system "$prefix_cd make install -j$par";
+    if ($repo eq "gtest" && $gtest eq "") {
+        $gtest="$base_dir/$repo-install/";
+    }
+    if ($repo eq "fmt" && $fmt_path eq "") {
+        $fmt_path="$base_dir/$repo-install/";
+    }
 }
 
 foreach my $repo (@repo_install_order) {
     my $base_dir = "$root_dir/$repo";
     #print "$repo: base=$base_dir\n";
     #next if ($repo ne 'meld');
-    next if $backend == 0 && $repo eq "backend";
-    next if $backend == 0 && $repo eq "frontend";
-    next if $backend == 0 && $repo eq "examples";
     if ($clean == 1) {
         &clean_repo($base_dir,$repo);
     } else {

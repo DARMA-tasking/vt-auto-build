@@ -169,6 +169,15 @@ sub build_install {
     }
 }
 
+my $version = `cmake --version | head -1 | awk '{print \$3}'`;
+chomp $version;
+
+system("cmake -P test_cmake_version.cmake") == 0 or
+    die "You need a more up-to-date cmake:\n \t " .
+    "Current version: $version \n\t" .
+    "Required version: 3.10\n";
+# print "CMAKE VERSION: $ret\n";
+
 foreach my $repo (@repo_install_order) {
     my $base_dir = "$root_dir/$repo";
     #print "$repo: base=$base_dir\n";

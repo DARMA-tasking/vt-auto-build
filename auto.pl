@@ -151,16 +151,23 @@ sub build_install {
     my $prefix_cd = "cd $build_dir &&";
     my $args = &get_args($repo);
     if ($repo eq "fmt" || $repo eq "gtest") {
-        system "$prefix_cd $cur_dir/build-$repo.sh Release $args";
+        my $conf_cmd = "$prefix_cd $cur_dir/build-$repo.sh Release $args";
+        system("$conf_cmd") == 0 or die "Failed: $conf_cmd\n";
     } elsif ($repo eq "vt") {
         my $cmd = "$prefix_cd $src_dir/scripts/build_$repo.pl $args\n";
-        system $cmd;
+        system("$cmd") == 0 or die "Failed: $cmd\n";
     } else {
         my $cmd = "$prefix_cd $src_dir/build-$repo.sh $build_mode $args";
-        system $cmd;
+        system("$cmd") == 0 or die "Failed: $cmd\n";
     }
-    system "$prefix_cd make -j$par";
-    system "$prefix_cd make install -j$par";
+    my $verbose_str = "";
+    if ($verbose == 1) {
+        $verbose_str = " VERBOSE=1 ";
+    }
+    my $build_cmd = "$prefix_cd make $verbose_str -j$par";
+    my $build_install = "$prefix_cd make install $verbose_str -j$par";
+    system("$build_cmd") == 0 or die "Build failed: $build_cmd\n";
+    system("$build_install") == 0 or die "Install failed: $build_cmd\n";;
     if ($repo eq "gtest" && $gtest eq "") {
         $gtest="$base_dir/$repo-install/";
     }

@@ -53,8 +53,8 @@ my %repos = (
 );
 
 my %repos_branch = (
-    'gtest'      => qw(master),
-    'fmt'        => qw(master),
+    'gtest'      => qw(release-1.8.1),
+    'fmt'        => qw(5.2.1),
     'vt'         => qw(develop),
     'detector'   => qw(master),
     'meld'       => qw(master),

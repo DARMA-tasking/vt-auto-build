@@ -146,7 +146,6 @@ sub build_install {
     print "=== Starting build/install of dependency: $repo ===\n";
     print "=== Cloning $repo_path: $git_cmd ===\n";
     system "$git_cmd" if (!(-e $src_dir));
-    system "cd $src_dir && git checkout $branch";
     #print "XXX: cd $src_dir && git checkout $repos_branch{$repo}\n";
     my $prefix_cd = "cd $build_dir &&";
     my $args = &get_args($repo);

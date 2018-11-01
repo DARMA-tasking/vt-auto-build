@@ -9,7 +9,7 @@ use lib dirname (__FILE__);
 require "args.pl";
 
 my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
-my ($backend,$compiler_c,$compiler_cxx);
+my ($backend,$compiler_c,$compiler_cxx,$kokkos_path);
 my ($par,$clean,$dry_run,$verbose, $atomic);
 
 my $arg = Args->new();

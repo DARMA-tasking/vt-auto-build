@@ -96,8 +96,8 @@ sub get_args {
         if (!$build_all_tests) {
             $build_test = "OFF";
         }
-        return "1 $detector_path $gtest $build_test "
-            " $compiler_c $compiler_cxx $kokkos_path";
+        return "1 $detector_path $gtest $build_test " .
+               " $compiler_c $compiler_cxx $kokkos_path";
     } elsif ($repo eq "detector" || $repo eq "meld") {
         return "$compiler_c $compiler_cxx";
     } elsif ($repo eq "vt") {

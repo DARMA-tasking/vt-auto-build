@@ -28,6 +28,7 @@ $arg->add_required_arg("compiler_cxx",\$compiler_cxx,    "");
 $arg->add_optional_arg("root_dir",    \$root_dir,        $cur_dir);
 $arg->add_optional_arg("build_tests", \$build_all_tests, 1);
 $arg->add_optional_arg("fmt",         \$fmt_path,        "");
+$arg->add_optional_arg("kokkos",      \$kokkos_path,     "");
 $arg->add_optional_arg("prefix",      \$prefix,          "");
 $arg->add_optional_arg("par",         \$par,             14);
 $arg->add_optional_arg("dry_run",     \$dry_run,         0);
@@ -95,7 +96,8 @@ sub get_args {
         if (!$build_all_tests) {
             $build_test = "OFF";
         }
-        return "1 $detector_path $gtest $build_test $compiler_c $compiler_cxx";
+        return "1 $detector_path $gtest $build_test "
+            " $compiler_c $compiler_cxx $kokkos_path";
     } elsif ($repo eq "detector" || $repo eq "meld") {
         return "$compiler_c $compiler_cxx";
     } elsif ($repo eq "vt") {

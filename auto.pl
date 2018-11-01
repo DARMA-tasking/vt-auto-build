@@ -167,7 +167,9 @@ sub build_install {
     }
     my $build_cmd = "$prefix_cd make $verbose_str -j$par";
     my $build_install = "$prefix_cd make install $verbose_str -j$par";
+    print "Running: $build_cmd\n";
     system("$build_cmd") == 0 or die "Build failed: $build_cmd\n";
+    print "Running: $build_install\n";
     system("$build_install") == 0 or die "Install failed: $build_cmd\n";;
     if ($repo eq "gtest" && $gtest eq "") {
         $gtest="$base_dir/$repo-install/";

@@ -1,5 +1,12 @@
 #!/usr/bin/env perl
 
+#
+#                                     args.pl
+#
+# Jonathan Lifflander's fancy argument parser for PERL scripts, in true glorious
+# perl style. It works however you try to use it: positional, keyword, opt/req,
+#
+
 use strict;
 use warnings;
 

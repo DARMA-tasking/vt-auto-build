@@ -26,23 +26,34 @@ use warnings;
 
     sub add_required_arg {
         my $self = shift;
-        return $self->add_argument(shift, 1, shift, undef, 0, undef);
+        return $self->add_argument(shift, 1, shift, undef, 0, undef, undef);
     }
 
     sub add_optional_arg {
         my $self = shift;
-        return $self->add_argument(shift, 0, shift, shift, 0, undef);
+        return $self->add_argument(shift, 0, shift, shift, 0, undef, undef);
     }
 
     sub add_optional_func {
         my $self = shift;
-        return $self->add_argument(shift, 0, shift, shift, 1, shift);
+        return $self->add_argument(shift, 0, shift, shift, 1, shift, undef);
+    }
+
+    sub add_required_val {
+        my $self = shift;
+        return $self->add_argument(shift, 0, shift, undef, 0, undef, shift);
+    }
+
+    sub add_optional_val {
+        my $self = shift;
+        return $self->add_argument(shift, 0, shift, shift, 0, undef, shift);
     }
 
     sub add_argument {
         my $self = shift;
-        my ($name,$required,$ref,$default,$hasfn,$fn) = @_;
-        $self->{input_params}{$name} = [$required,0,$ref,$default,$hasfn,$fn];
+        my ($name,$required,$ref,$default,$hasfn,$fn,$vals) = @_;
+        $self->{input_params}{$name} =
+            [$required,0,$ref,$default,$hasfn,$fn,$vals];
         my $cur_pos = $self->{cur_position};
         my $verbose = $self->{verbose};
         $self->{input_params_pos}{$cur_pos} = $name;
@@ -111,6 +122,7 @@ use warnings;
         }
         my $arg_position = 0;
         for (@args) {
+            my $found_match = 0;
             my @spl = split /=/,$_;
 
             print "\t arg=\"$_\", spl=@spl\n" if $verbose == 1;
@@ -120,6 +132,7 @@ use warnings;
                 if (${$input_params{$pos_key}}[1] != 1) {
                     ${${$input_params{$pos_key}}[2]} = $spl[0];
                     ${$input_params{$pos_key}}[1] = 1;
+                    $found_match = 1;
                 } else {
                     die "error parsing: argument without equal: $_\n";
                 }
@@ -129,6 +142,7 @@ use warnings;
                   print "found exact matching: $exact_key\n" if $verbose == 1;
                   ${${$input_params{$exact_key}}[2]} = $spl[1];
                   ${$input_params{$exact_key}}[1] = 1;
+                  $found_match = 1;
               } else {
                   for my $key (keys %input_params) {
                       print "\t\t key=\"$key\" \t arg=\"$_\"\n" if $verbose == 1;
@@ -140,11 +154,16 @@ use warnings;
                               #print "@state\n";
                               ${${$input_params{$key}}[2]} = $1;
                               ${$input_params{$key}}[1] = 1;
+                              $found_match = 1;
                           }
                           last;
                       }
                   }
               }
+            }
+
+            if ($found_match == 0) {
+                die "invalid argument: \"$_\", unknown key: $spl[0]\n";
             }
 
             $arg_position += 1;
@@ -163,8 +182,24 @@ use warnings;
                     #$self->print_arguments();
                     die "error parsing value\n";
                 }
-                ${$input_params{$_}}[1] = 1;
+                #${$input_params{$_}}[1] = 1;
             }
+
+
+            if (${$input_params{$_}}[1] == 1) {
+                my $len = @{$input_params{$_}};
+                if (defined ${$input_params{$_}}[6]) {
+                    my @allowed_lst = @{${$input_params{$_}}[6]};
+                    my %lst_hash = map { $_ => 1 } @allowed_lst;
+                    my $value = ${${$input_params{$_}}[2]};
+                    if (!exists $lst_hash{$value}) {
+                        my $allowed_lst_print = join ' | ', @allowed_lst;
+                        die "invalid argument: \"$_\" must be: ($allowed_lst_print)\n";
+                    }
+                }
+            }
+
+
             print "$_:${$input_params{$_}}[1]\n" if $verbose == 1;
         }
     }

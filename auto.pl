@@ -9,8 +9,9 @@ use lib dirname (__FILE__);
 require "args.pl";
 
 my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
-my ($backend,$compiler_c,$compiler_cxx,$kokkos_path);
-my ($par,$clean,$dry_run,$verbose, $atomic);
+my ($backend,$compiler_c,$compiler_cxx,$kokkos_path,$build_kokkos);
+my ($par,$clean,$dry_run,$verbose,$atomic);
+my $vt_build = "";
 
 my $arg = Args->new();
 
@@ -22,21 +23,38 @@ sub clean_dir {
 
 my $cur_dir = clean_dir `pwd`;
 
-$arg->add_required_arg("build_mode",  \$build_mode         );
-$arg->add_required_arg("compiler_c",  \$compiler_c,      "");
-$arg->add_required_arg("compiler_cxx",\$compiler_cxx,    "");
-$arg->add_optional_arg("root_dir",    \$root_dir,        $cur_dir);
-$arg->add_optional_arg("build_tests", \$build_all_tests, 1);
-$arg->add_optional_arg("fmt",         \$fmt_path,        "");
-$arg->add_optional_arg("kokkos",      \$kokkos_path,     "");
-$arg->add_optional_arg("prefix",      \$prefix,          "");
-$arg->add_optional_arg("par",         \$par,             14);
-$arg->add_optional_arg("dry_run",     \$dry_run,         0);
-$arg->add_optional_arg("verbose",     \$verbose,         0);
-$arg->add_optional_arg("gtest",       \$gtest,           "");
-$arg->add_optional_arg("clean",       \$clean,           0);
-$arg->add_optional_arg("backend",     \$backend,         0);
-$arg->add_optional_arg("atomic",      \$atomic,          "");
+my @vt_builds = (
+    'debug',
+    'release',
+    'debug_v1',    # Enable debug prints at v1/v2 levels
+    'debug_v2',
+    'debug_trace', # Enable tracing in VT with projections
+    'release_trace'
+);
+
+my @builds = (
+    'debug', 'release'
+);
+
+my @modes = ("debug","release");
+
+$arg->add_required_val("build_mode",    \$build_mode,      \@builds);
+$arg->add_required_arg("compiler_c",    \$compiler_c,      "");
+$arg->add_required_arg("compiler_cxx",  \$compiler_cxx,    "");
+$arg->add_optional_val("vt_build_mode", \$vt_build,        "", \@vt_builds);
+$arg->add_optional_arg("root_dir",      \$root_dir,        $cur_dir);
+$arg->add_optional_arg("build_tests",   \$build_all_tests, 1);
+$arg->add_optional_arg("fmt",           \$fmt_path,        "");
+$arg->add_optional_arg("kokkos",        \$kokkos_path,     "");
+$arg->add_optional_arg("build_kokkos",  \$build_kokkos,    0);
+$arg->add_optional_arg("prefix",        \$prefix,          "");
+$arg->add_optional_arg("par",           \$par,             14);
+$arg->add_optional_arg("dry_run",       \$dry_run,         0);
+$arg->add_optional_arg("verbose",       \$verbose,         0);
+$arg->add_optional_arg("gtest",         \$gtest,           "");
+$arg->add_optional_arg("clean",         \$clean,           0);
+$arg->add_optional_arg("backend",       \$backend,         0);
+$arg->add_optional_arg("atomic",        \$atomic,          "");
 
 $arg->parse_arguments(@ARGV);
 
@@ -50,7 +68,8 @@ my %repos = (
     'vt'         => qw(darma-mpi-backend/vt.git),
     'detector'   => qw(darma-mpi-backend/detector.git),
     'meld'       => qw(darma-mpi-backend/meld.git),
-    'checkpoint' => qw(darma-mpi-backend/checkpoint.git)
+    'checkpoint' => qw(darma-mpi-backend/checkpoint.git),
+    'kokkos'     => qw(kokkos/kokkos.git)
 );
 
 my %repos_branch = (
@@ -59,7 +78,8 @@ my %repos_branch = (
     'vt'         => qw(develop),
     'detector'   => qw(master),
     'meld'       => qw(master),
-    'checkpoint' => qw(master)
+    'checkpoint' => qw(master),
+    'kokkos'     => qw(develop)
 );
 
 my @repo_install_order = (
@@ -71,7 +91,21 @@ my @repo_install_order = (
     'vt'
 );
 
-print "auto build: root=$root_dir, prefix=$prefix\n";
+if ($vt_build eq "") {
+    $vt_build = $build_mode;
+}
+
+if ($build_kokkos == 1) {
+    if ($kokkos_path ne "") {
+        die "if build_kokkos is enabled, kokkos=X should not be present\n";
+    }
+    $kokkos_path = "$root_dir/kokkos/kokkos-install/lib/";
+    unshift @repo_install_order, "kokkos";
+}
+
+print "auto build: root=$root_dir, prefix=$prefix: @repo_install_order\n";
+
+# exit 1;
 
 sub clean_repo {
     my ($base_dir,$repo) = @_;
@@ -116,7 +150,7 @@ sub get_args {
             $atomic_str = "atomic=true";
         }
         my $str =
-            "build_mode=$build_mode " .
+            "build_mode=$vt_build " .
             "compiler=clang " .
             $compiler_str .
             "build_tests=$build_all_tests " .
@@ -129,7 +163,7 @@ sub get_args {
         print "compiler string=\"$compiler_str\"\n";
         print "string=\"$str\"\n";
         return $str;
-    } elsif ($repo eq "fmt" || $repo eq "gtest") {
+    } elsif ($repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos") {
         return "$compiler_c $compiler_cxx";
     }
 }
@@ -151,7 +185,8 @@ sub build_install {
     #print "XXX: cd $src_dir && git checkout $repos_branch{$repo}\n";
     my $prefix_cd = "cd $build_dir &&";
     my $args = &get_args($repo);
-    if ($repo eq "fmt" || $repo eq "gtest") {
+    if ($repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos") {
+        # @todo: this should be the default
         my $conf_cmd = "$prefix_cd $cur_dir/build-$repo.sh Release $args";
         system("$conf_cmd") == 0 or die "Failed: $conf_cmd\n";
     } elsif ($repo eq "vt") {

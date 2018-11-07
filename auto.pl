@@ -9,7 +9,7 @@ use lib dirname (__FILE__);
 require "args.pl";
 
 my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
-my ($backend,$compiler_c,$compiler_cxx,$kokkos_path,$build_kokkos);
+my ($backend,$compiler_c,$compiler_cxx,$kokkos_path,$kokkoscore_path,$build_kokkos);
 my ($par,$clean,$dry_run,$verbose,$atomic);
 my $vt_build = "";
 
@@ -45,7 +45,8 @@ $arg->add_optional_val("vt_build_mode", \$vt_build,        "", \@vt_builds);
 $arg->add_optional_arg("root_dir",      \$root_dir,        $cur_dir);
 $arg->add_optional_arg("build_tests",   \$build_all_tests, 1);
 $arg->add_optional_arg("fmt",           \$fmt_path,        "");
-$arg->add_optional_arg("kokkos",        \$kokkos_path,     "");
+$arg->add_optional_arg("kokkos",        \$kokkos_path,     "-");
+$arg->add_optional_arg("kokkoscore",    \$kokkoscore_path, "-");
 $arg->add_optional_arg("build_kokkos",  \$build_kokkos,    0);
 $arg->add_optional_arg("prefix",        \$prefix,          "");
 $arg->add_optional_arg("par",           \$par,             14);
@@ -78,7 +79,7 @@ my %repos_branch = (
     'vt'         => qw(develop),
     'detector'   => qw(master),
     'meld'       => qw(master),
-    'checkpoint' => qw(master),
+    'checkpoint' => qw(allow-link-against-kokkoscore),
     'kokkos'     => qw(develop)
 );
 
@@ -98,6 +99,9 @@ if ($vt_build eq "") {
 if ($build_kokkos == 1) {
     if ($kokkos_path ne "") {
         die "if build_kokkos is enabled, kokkos=X should not be present\n";
+    }
+    if ($kokkoscore_path ne "") {
+        die "if build_kokkos is enabled, kokkoscore=X should not be present\n";
     }
     $kokkos_path = "$root_dir/kokkos/kokkos-install/lib/";
     unshift @repo_install_order, "kokkos";
@@ -131,7 +135,7 @@ sub get_args {
             $build_test = "OFF";
         }
         return "1 $detector_path $gtest $build_test " .
-               " $compiler_c $compiler_cxx $kokkos_path";
+               " $compiler_c $compiler_cxx $kokkos_path $kokkoscore_path";
     } elsif ($repo eq "detector" || $repo eq "meld") {
         return "$compiler_c $compiler_cxx";
     } elsif ($repo eq "vt") {

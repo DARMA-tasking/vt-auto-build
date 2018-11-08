@@ -143,7 +143,8 @@ use warnings;
             } else {
                 $def = "<no-default-value>";
             }
-            printf "\t %-40s %-40s %-40s %-40s\n", $key, $req_str, $cur_val, $def;
+            printf "\t %-40s %-40s %-40s %-40s\n",
+                $key, $req_str, $def, $cur_val;
             #print "\t$key $req_str $cur_val\n";
         }
     }

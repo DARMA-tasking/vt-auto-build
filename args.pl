@@ -15,23 +15,23 @@ use warnings;
 
     sub new {
         my $class = "Args";
-        my $self = {};
+        my $self  = {};
         bless($self, $class);
-        $self->{input_params} = {};
+        $self->{input_params}     = {};
         $self->{input_params_pos} = {};
-        $self->{verbose} = 0;
-        $self->{cur_position} = 0;
+        $self->{verbose}          = 0;
+        $self->{cur_position}     = 0;
 
         ############################################
         ###      Hash Layout for input param     ###
         ############################################
-        # $self->{input_params}{name} = "";
-        # $self->{input_params}{required} = 0;
+        # $self->{input_params}{name}       = "";
+        # $self->{input_params}{required}   = 0;
         # $self->{input_params}{ref_to_var} = 0;
-        # $self->{input_params}{default} = 0;
-        # $self->{input_params}{has_fn} = 0;
-        # $self->{input_params}{fn} = undef;
-        # $self->{input_params}{values} = undef;
+        # $self->{input_params}{default}    = 0;
+        # $self->{input_params}{has_fn}     = 0;
+        # $self->{input_params}{fn}         = undef;
+        # $self->{input_params}{values}     = undef;
         ############################################
 
         return $self;
@@ -85,8 +85,8 @@ use warnings;
     }
 
     sub get_argument_value {
-        my $self = shift;
-        my $arg = shift;
+        my $self         = shift;
+        my $arg          = shift;
         my %input_params = %{$self->{input_params}};
         if (exists $input_params{$arg}) {
             my $is_required   = $input_params{$arg}{required};
@@ -150,11 +150,11 @@ use warnings;
     }
 
     sub parse_arguments {
-        my $self = shift;
-        my @args = @_;
-        my %input_params = %{$self->{input_params}};
+        my $self             = shift;
+        my @args             = @_;
+        my %input_params     = %{$self->{input_params}};
         my %input_params_pos = %{$self->{input_params_pos}};
-        my $verbose = $self->{verbose};
+        my $verbose          = $self->{verbose};
         for (@args) {
             if ($_ eq "-h" || $_ eq "--help" || $_ eq "-help") {
                 $self->print_arguments();
@@ -170,7 +170,7 @@ use warnings;
         my $arg_position = 0;
         for (@args) {
             my $found_match = 0;
-            my @spl = split /=/,$_;
+            my @spl         = split /=/,$_;
 
             print "\t arg=\"$_\", spl=@spl\n" if $verbose == 1;
 

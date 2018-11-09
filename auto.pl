@@ -73,7 +73,7 @@ my %repos = (
 );
 
 my %repos_branch = (
-    'gtest'      => qw(release-1.8.1),
+    'gtest'      => qw(master),
     'fmt'        => qw(5.2.1),
     'vt'         => qw(develop),
     'detector'   => qw(master),
@@ -187,6 +187,13 @@ sub build_install {
     my $args = &get_args($repo);
     if ($repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos") {
         # @todo: this should be the default
+        if ($repo eq "gtest") {
+            system("cd $src_dir && git pull --depth=1000000 origin master")
+                == 0 or die "Failed";
+            system("cd $src_dir && git checkout 43863938377a9ea")
+                == 0 or die "Failed";
+        }
+
         my $conf_cmd = "$prefix_cd $cur_dir/build-$repo.sh Release $args";
         system("$conf_cmd") == 0 or die "Failed: $conf_cmd\n";
     } elsif ($repo eq "vt") {

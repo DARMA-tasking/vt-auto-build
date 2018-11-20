@@ -166,8 +166,6 @@ sub get_args {
             "fmt=$fmt_path "                .
             "gtest=$gtest "                 .
             "$atomic_str "                  .
-            "mpi_c=$mpi_cc "                .
-            "mpi_cxx=$mpi_cxx "             .
             "checkpoint=$cpath ";
         print "compiler string=\"$compiler_str\"\n";
         print "string=\"$str\"\n";

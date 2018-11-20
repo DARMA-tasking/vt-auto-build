@@ -11,6 +11,7 @@ require "args.pl";
 my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
 my ($backend,$compiler_c,$compiler_cxx,$kokkos_path,$build_kokkos);
 my ($par,$clean,$dry_run,$verbose,$atomic);
+my ($mpi_cc,$mpi_cxx);
 my $vt_build = "";
 
 my $arg = Args->new();
@@ -55,6 +56,8 @@ $arg->add_optional_arg("gtest",         \$gtest,           "");
 $arg->add_optional_arg("clean",         \$clean,           0);
 $arg->add_optional_arg("backend",       \$backend,         0);
 $arg->add_optional_arg("atomic",        \$atomic,          "");
+$arg->add_optional_arg("mpi_cc",        \$mpi_cc,          "");
+$arg->add_optional_arg("mpi_cxx",       \$mpi_cxx,         "");
 
 $arg->parse_arguments(@ARGV);
 
@@ -149,16 +152,22 @@ sub get_args {
         if ($atomic ne "") {
             $atomic_str = "atomic=true";
         }
+        my $mpi_str = "";
+        $mpi_str .= "mpi_cc=$mpi_cc "   if $mpi_cc  ne "";
+        $mpi_str .= "mpi_cxx=$mpi_cxx " if $mpi_cxx ne "";
         my $str =
-            "build_mode=$vt_build " .
-            "compiler=clang " .
-            $compiler_str .
+            "build_mode=$vt_build "         .
+            "compiler=clang "               .
+            $compiler_str                   .
+            $mpi_str                        .
             "build_tests=$build_all_tests " .
-            "detector=$dpath " .
-            "meld=$mpath " .
-            "fmt=$fmt_path " .
-            "gtest=$gtest " .
-            "$atomic_str " .
+            "detector=$dpath "              .
+            "meld=$mpath "                  .
+            "fmt=$fmt_path "                .
+            "gtest=$gtest "                 .
+            "$atomic_str "                  .
+            "mpi_c=$mpi_cc "                .
+            "mpi_cxx=$mpi_cxx "             .
             "checkpoint=$cpath ";
         print "compiler string=\"$compiler_str\"\n";
         print "string=\"$str\"\n";

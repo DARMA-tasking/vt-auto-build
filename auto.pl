@@ -81,7 +81,7 @@ my %repos_branch = (
     'vt'         => qw(develop),
     'detector'   => qw(master),
     'meld'       => qw(master),
-    'checkpoint' => qw(master),
+    'checkpoint' => qw(develop),
     'kokkos'     => qw(develop)
 );
 

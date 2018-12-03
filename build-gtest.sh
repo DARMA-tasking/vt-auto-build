@@ -19,5 +19,4 @@ cmake ../gtest                                                         \
       -DCMAKE_CXX_COMPILER=${compiler_cxx}                             \
       -DCMAKE_C_COMPILER=${compiler_c}                                 \
       -DCMAKE_BUILD_TYPE=${build_mode}                                 \
-      -DCMAKE_CXX_COMPILER_LAUNCHER=ccache                             \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=true

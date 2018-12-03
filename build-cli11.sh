@@ -20,6 +20,5 @@ cmake ../cli11                                                         \
       -DCMAKE_C_COMPILER=${compiler_c}                                 \
       -DCMAKE_BUILD_TYPE=${build_mode}                                 \
       -DCLI11_TESTING:BOOL=OFF                                         \
-      -DCMAKE_CXX_COMPILER_LAUNCHER=ccache                             \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=true
 

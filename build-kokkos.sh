@@ -20,4 +20,5 @@ cmake ../kokkos                                                        \
       -DCMAKE_C_COMPILER=${compiler_c}                                 \
       -DCMAKE_BUILD_TYPE=${build_mode}                                 \
       -DKOKKOS_ENABLE_OPENMP:BOOL=ON                                   \
+      -DCMAKE_CXX_COMPILER_LAUNCHER=ccache                             \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=true

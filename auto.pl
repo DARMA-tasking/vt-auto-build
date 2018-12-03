@@ -8,7 +8,7 @@ use lib dirname (__FILE__);
 
 require "args.pl";
 
-my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path);
+my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path,$cli11_path);
 my ($backend,$compiler_c,$compiler_cxx,$kokkos_path,$build_kokkos);
 my ($par,$clean,$dry_run,$verbose,$atomic);
 my ($mpi_cc,$mpi_cxx);
@@ -46,6 +46,7 @@ $arg->add_optional_val("vt_build_mode", \$vt_build,        "", \@vt_builds);
 $arg->add_optional_arg("root_dir",      \$root_dir,        $cur_dir);
 $arg->add_optional_arg("build_tests",   \$build_all_tests, 1);
 $arg->add_optional_arg("fmt",           \$fmt_path,        "");
+$arg->add_optional_arg("cli11",         \$cli11_path,      "");
 $arg->add_optional_arg("kokkos",        \$kokkos_path,     "");
 $arg->add_optional_arg("build_kokkos",  \$build_kokkos,    0);
 $arg->add_optional_arg("prefix",        \$prefix,          "");
@@ -66,6 +67,7 @@ $root_dir = $root_dir . "/" . $prefix . "/";
 my $github_prefix = qw(git@github.com:);
 
 my %repos = (
+    'cli11'      => qw(CLIUtils/CLI11.git),
     'gtest'      => qw(google/googletest.git),
     'fmt'        => qw(fmtlib/fmt.git),
     'vt'         => qw(darma-mpi-backend/vt.git),
@@ -76,6 +78,7 @@ my %repos = (
 );
 
 my %repos_branch = (
+    'cli11'      => qw(v1.6.2),
     'gtest'      => qw(master),
     'fmt'        => qw(5.2.1),
     'vt'         => qw(develop),
@@ -86,6 +89,7 @@ my %repos_branch = (
 );
 
 my @repo_install_order = (
+    'cli11',
     'fmt',
     'gtest',
     'meld',
@@ -164,13 +168,17 @@ sub get_args {
             "detector=$dpath "              .
             "meld=$mpath "                  .
             "fmt=$fmt_path "                .
+            "cli11=$cli11_path "            .
             "gtest=$gtest "                 .
             "$atomic_str "                  .
             "checkpoint=$cpath ";
         print "compiler string=\"$compiler_str\"\n";
         print "string=\"$str\"\n";
         return $str;
-    } elsif ($repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos") {
+    } elsif (
+        $repo eq "fmt"   || $repo eq "gtest" || $repo eq "cli11" ||
+        $repo eq "kokkos"
+      ) {
         return "$compiler_c $compiler_cxx";
     }
 }
@@ -192,7 +200,10 @@ sub build_install {
     #print "XXX: cd $src_dir && git checkout $repos_branch{$repo}\n";
     my $prefix_cd = "cd $build_dir &&";
     my $args = &get_args($repo);
-    if ($repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos") {
+    if (
+        $repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos" ||
+        $repo eq "cli11"
+      ) {
         # @todo: this should be the default
         if ($repo eq "gtest") {
             system("cd $src_dir && git pull --depth=1000000 origin master")
@@ -225,6 +236,9 @@ sub build_install {
     }
     if ($repo eq "fmt" && $fmt_path eq "") {
         $fmt_path="$base_dir/$repo-install/";
+    }
+    if ($repo eq "cli11" && $cli11_path eq "") {
+        $cli11_path="$base_dir/$repo-install/";
     }
 }
 

@@ -14,9 +14,19 @@ compiler_cxx=clang++-mp-3.9
 if test $# -gt 1; then compiler_c=$2; fi
 if test $# -gt 2; then compiler_cxx=$3; fi
 
+has_ccache=`which ccache`
+
+if test $? -eq 0
+then
+    maybe_ccache="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache "
+else
+    maybe_ccache=""
+fi
+
 cmake ../gtest                                                         \
       -DCMAKE_INSTALL_PREFIX=../gtest-install                          \
       -DCMAKE_CXX_COMPILER=${compiler_cxx}                             \
       -DCMAKE_C_COMPILER=${compiler_c}                                 \
       -DCMAKE_BUILD_TYPE=${build_mode}                                 \
-      -DCMAKE_EXPORT_COMPILE_COMMANDS=true
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=true                             \
+      ${maybe_ccache}

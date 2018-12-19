@@ -10,7 +10,7 @@ require "args.pl";
 
 my ($build_mode,$build_all_tests,$gtest,$root_dir,$prefix,$fmt_path,$cli11_path);
 my ($backend,$compiler_c,$compiler_cxx,$kokkos_path,$build_kokkos);
-my ($par,$clean,$dry_run,$verbose,$atomic,$fast_build);
+my ($par,$clean,$dry_run,$verbose,$atomic,$fast_build,$vt_detector,$lb_on);
 my ($mpi_cc,$mpi_cxx);
 my $vt_build = "";
 
@@ -60,6 +60,8 @@ $arg->add_optional_arg("atomic",        \$atomic,          "");
 $arg->add_optional_arg("mpi_cc",        \$mpi_cc,          "");
 $arg->add_optional_arg("mpi_cxx",       \$mpi_cxx,         "");
 $arg->add_optional_arg("fast_build",    \$fast_build,      0);
+$arg->add_optional_arg("vt_detector",   \$vt_detector,     1);
+$arg->add_optional_arg("lb",            \$lb_on,           0);
 
 $arg->parse_arguments(@ARGV);
 
@@ -162,6 +164,10 @@ sub get_args {
         $mpi_str .= "mpi_cxx=$mpi_cxx " if $mpi_cxx ne "";
         my $fast_str = "";
         $fast_str .= "fast=1 " if $fast_build == 1;
+        my $detect_str = "";
+        $detect_str .= "detector_on=0" if $vt_detector == 0;
+        my $lb_str = "";
+        $lb_str .= "lb_on=1" if $lb_on == 1;
         my $str =
             "build_mode=$vt_build "         .
             "compiler=clang "               .
@@ -175,6 +181,8 @@ sub get_args {
             "cli11=$cli11_path "            .
             "gtest=$gtest "                 .
             "$atomic_str "                  .
+            "$detect_str "                  .
+            "$lb_str "                      .
             "checkpoint=$cpath ";
         print "compiler string=\"$compiler_str\"\n";
         print "string=\"$str\"\n";

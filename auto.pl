@@ -31,7 +31,8 @@ my @vt_builds = (
     'debug_v1',    # Enable debug prints at v1/v2 levels
     'debug_v2',
     'debug_trace', # Enable tracing in VT with projections
-    'release_trace'
+    'release_trace',
+    'coverage' # Enable coverage for VT
 );
 
 my @builds = (
@@ -102,6 +103,27 @@ my @repo_install_order = (
     'checkpoint',
     'vt'
 );
+
+# in case of coverage, we turn the build to a debug mode
+# and switch the compiler for a compatible one : gcc
+# to add coverage flags for CXX_FLAGS and C_FLAGS
+if ($vt_build eq "coverage") {
+    $build_mode = "debug";
+    my $gcc_for_coverage ="gcc-8";
+    my $gxx_for_coverage ="g++-8";
+    my $gcc = `which $gcc_for_coverage`;
+    my $gxx = `which $gxx_for_coverage`;
+    if ($gcc eq "") {
+        die "Failed: Please install $gcc_for_coverage for using code coverage ";
+    }
+    if ($gxx eq "") {
+        die "Failed: Please install $gxx_for_coverage for using code coverage ";
+    }
+    $compiler_c = $gcc;
+    $compiler_cxx = $gxx;
+    chomp($compiler_c);
+    chomp($compiler_cxx);
+}
 
 if ($vt_build eq "") {
     $vt_build = $build_mode;
@@ -204,8 +226,12 @@ sub build_install {
     my ($base_dir,$repo,$mode) = @_;
     my $src_dir = "$base_dir/$repo";
     my $build_dir = "$base_dir/$repo-build";
+    my $build_dir_debug = "$base_dir/$repo-build-debug";
     my $install_dir = "$base_dir/$repo-install";
     &create_dir($build_dir);
+    if ($repo eq "gtest") {
+      &create_dir($build_dir_debug);
+    }
     &create_dir($install_dir);
     my $repo_path = "$github_prefix/$repos{$repo}";
     my $branch = "$repos_branch{$repo}";
@@ -216,6 +242,7 @@ sub build_install {
     system "$git_cmd" if (!(-e $src_dir));
     #print "XXX: cd $src_dir && git checkout $repos_branch{$repo}\n";
     my $prefix_cd = "cd $build_dir &&";
+    my $prefix_cd_debug = "cd $build_dir_debug &&";
     my $args = &get_args($repo);
     if (
         $repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos" ||
@@ -230,7 +257,11 @@ sub build_install {
         }
 
         my $conf_cmd = "$prefix_cd $cur_dir/build-$repo.sh Release $args";
+        my $conf_cmd_debug = "$prefix_cd_debug $cur_dir/build-$repo.sh Debug $args";
         system("$conf_cmd") == 0 or die "Failed: $conf_cmd\n";
+        if ($repo eq "gtest") {
+            system("$conf_cmd_debug") == 0 or die "Failed: $conf_cmd_debug\n";
+        }
     } elsif ($repo eq "vt") {
         my $cmd = "$prefix_cd $src_dir/scripts/build_$repo.pl $args\n";
         system("$cmd") == 0 or die "Failed: $cmd\n";
@@ -244,10 +275,19 @@ sub build_install {
     }
     my $build_cmd = "$prefix_cd make $verbose_str -j$par";
     my $build_install = "$prefix_cd make install $verbose_str -j$par";
+    my $build_cmd_debug = "$prefix_cd_debug make $verbose_str -j$par";
+    my $build_install_debug = "$prefix_cd_debug make install $verbose_str -j$par";
+
     print "Running: $build_cmd\n";
     system("$build_cmd") == 0 or die "Build failed: $build_cmd\n";
     print "Running: $build_install\n";
     system("$build_install") == 0 or die "Install failed: $build_cmd\n";;
+    if ($repo eq "gtest") {
+        print "Running: $build_cmd_debug\n";
+        system("$build_cmd_debug") == 0 or die "Build failed: $build_cmd_debug\n";
+        print "Running: $build_install_debug\n";
+        system("$build_install_debug") == 0 or die "Install failed: $build_install_debug\n";;
+    }
     if ($repo eq "gtest" && $gtest eq "") {
         $gtest="$base_dir/$repo-install/";
     }

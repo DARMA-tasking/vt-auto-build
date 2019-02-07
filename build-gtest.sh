@@ -10,6 +10,7 @@ build_mode=$1
 
 compiler_c=clang-mp-3.9
 compiler_cxx=clang++-mp-3.9
+cxx_11_flags=-std=c++11
 
 if test $# -gt 1; then compiler_c=$2; fi
 if test $# -gt 2; then compiler_cxx=$3; fi
@@ -25,6 +26,7 @@ fi
 
 cmake ../gtest                                                         \
       -DCMAKE_INSTALL_PREFIX=../gtest-install                          \
+      -DCMAKE_CXX_FLAGS=${cxx_11_flags}                                \
       -DCMAKE_CXX_COMPILER=${compiler_cxx}                             \
       -DCMAKE_C_COMPILER=${compiler_c}                                 \
       -DCMAKE_BUILD_TYPE=${build_mode}                                 \

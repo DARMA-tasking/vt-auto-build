@@ -221,14 +221,6 @@ sub build_install {
         $repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos" ||
         $repo eq "cli11"
       ) {
-        # @todo: this should be the default
-        if ($repo eq "gtest") {
-            system("cd $src_dir && git pull --depth=1000000 origin master")
-                == 0 or die "Failed";
-            system("cd $src_dir && git checkout 43863938377a9ea")
-                == 0 or die "Failed";
-        }
-
         my $conf_cmd = "$prefix_cd $cur_dir/build-$repo.sh Release $args";
         system("$conf_cmd") == 0 or die "Failed: $conf_cmd\n";
     } elsif ($repo eq "vt") {

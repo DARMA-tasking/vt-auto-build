@@ -10,7 +10,6 @@ build_mode=$1
 
 compiler_c=clang-mp-3.9
 compiler_cxx=clang++-mp-3.9
-cxx_11_flags=-std=c++11
 
 if test $# -gt 1; then compiler_c=$2; fi
 if test $# -gt 2; then compiler_cxx=$3; fi

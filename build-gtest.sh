@@ -25,7 +25,6 @@ fi
 
 cmake ../gtest                                                         \
       -DCMAKE_INSTALL_PREFIX=../gtest-install                          \
-      -DCMAKE_CXX_FLAGS=${cxx_11_flags}                                \
       -DCMAKE_CXX_COMPILER=${compiler_cxx}                             \
       -DCMAKE_C_COMPILER=${compiler_c}                                 \
       -DCMAKE_BUILD_TYPE=${build_mode}                                 \

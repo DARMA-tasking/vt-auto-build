@@ -236,6 +236,9 @@ sub build_install {
     my $repo_path = "$github_prefix/$repos{$repo}";
     my $branch = "$repos_branch{$repo}";
     my $git_cmd = "git clone --branch $branch --depth=1 $repo_path $src_dir";
+    if ($repo eq "gtest") {
+      $git_cmd = "git clone --branch $branch $repo_path $src_dir && cd $src_dir && git checkout 43863938377a9ea";
+    }
     print "\n";
     print "=== Starting build/install of dependency: $repo ===\n";
     print "=== Cloning $repo_path: $git_cmd ===\n";
@@ -248,16 +251,6 @@ sub build_install {
         $repo eq "fmt" || $repo eq "gtest" || $repo eq "kokkos" ||
         $repo eq "cli11"
       ) {
-        # @todo: this should be the default
-        my $flag_ref_ok = "flagRefOk";
-        if ( ($repo eq "gtest") and !(-e "$src_dir/$flag_ref_ok")) {
-            system("cd $src_dir && git pull --depth=1000000 origin master")
-                == 0 or die "Failed";
-            system("cd $src_dir && git checkout 43863938377a9ea")
-                == 0 or die "Failed";
-            open(WRITE,">$src_dir/$flag_ref_ok") or die("Unable to create ref gtest flag file : $!\n");
-            close(WRITE);
-        }
 
         my $conf_cmd = "$prefix_cd $cur_dir/build-$repo.sh Release $args";
         my $conf_cmd_debug = "$prefix_cd_debug $cur_dir/build-$repo.sh Debug $args";

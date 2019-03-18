@@ -81,7 +81,7 @@ my %repos = (
 
 my %repos_branch = (
     'gtest'      => qw(master),
-    'vt'         => qw(feature-301-directly-include-cli11-and-fmt),
+    'vt'         => qw(develop),
     'detector'   => qw(master),
     'meld'       => qw(master),
     'checkpoint' => qw(develop),

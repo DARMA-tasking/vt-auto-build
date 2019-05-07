@@ -74,7 +74,6 @@ my %repos = (
     'gtest'      => qw(google/googletest.git),
     'vt'         => qw(darma-mpi-backend/vt.git),
     'detector'   => qw(darma-mpi-backend/detector.git),
-    'meld'       => qw(darma-mpi-backend/meld.git),
     'checkpoint' => qw(darma-mpi-backend/checkpoint.git),
     'kokkos'     => qw(kokkos/kokkos.git)
 );
@@ -83,14 +82,12 @@ my %repos_branch = (
     'gtest'      => qw(master),
     'vt'         => qw(develop),
     'detector'   => qw(master),
-    'meld'       => qw(master),
     'checkpoint' => qw(develop),
     'kokkos'     => qw(develop)
 );
 
 my @repo_install_order = (
     'gtest',
-    'meld',
     'detector',
     'checkpoint',
     'vt'
@@ -149,7 +146,6 @@ sub get_args {
     my $repo = shift;
     my $detector_path = "$root_dir/detector/detector-install";
     my $checkpoint_path = "$root_dir/checkpoint/checkpoint-install";
-    my $meld_path = "$root_dir/meld/meld-install";
     my $vt_path = "$root_dir/vt/vt-install";
     if ($repo eq "checkpoint") {
         my $build_test = "ON";
@@ -158,12 +154,11 @@ sub get_args {
         }
         return "1 $detector_path $gtest $build_test " .
                " $compiler_c $compiler_cxx $kokkos_path";
-    } elsif ($repo eq "detector" || $repo eq "meld") {
+    } elsif ($repo eq "detector") {
         return "$compiler_c $compiler_cxx";
     } elsif ($repo eq "vt") {
         my $dpath = $detector_path;
         my $cpath = $checkpoint_path;
-        my $mpath = $meld_path;
         my $compiler_str = "";
         if ($compiler_c ne "") {
             $compiler_str = $compiler_str . "compiler_c=${compiler_c} "
@@ -194,7 +189,6 @@ sub get_args {
             $fast_str                       .
             "build_tests=$build_all_tests " .
             "detector=$dpath "              .
-            "meld=$mpath "                  .
             "gtest=$gtest "                 .
             "$atomic_str "                  .
             "$detect_str "                  .
@@ -289,7 +283,6 @@ system("cmake -P test_cmake_version.cmake") == 0 or
 foreach my $repo (@repo_install_order) {
     my $base_dir = "$root_dir/$repo";
     #print "$repo: base=$base_dir\n";
-    #next if ($repo ne 'meld');
     if ($clean == 1) {
         &clean_repo($base_dir,$repo);
     } else {

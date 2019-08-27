@@ -28,15 +28,12 @@ my $cur_dir = clean_dir `pwd`;
 my @vt_builds = (
     'debug',
     'release',
-    'debug_v1',    # Enable debug prints at v1/v2 levels
-    'debug_v2',
-    'debug_trace', # Enable tracing in VT with projections
-    'release_trace',
+    'relwithdebinfo',
     'coverage' # Enable coverage for VT
 );
 
 my @builds = (
-    'debug', 'release'
+    'debug', 'release', 'relwithdebinfo'
 );
 
 my @modes = ("debug","release");

@@ -69,9 +69,9 @@ my $github_prefix = qw(git@github.com:);
 
 my %repos = (
     'gtest'      => qw(google/googletest.git),
-    'vt'         => qw(darma-mpi-backend/vt.git),
-    'detector'   => qw(darma-mpi-backend/detector.git),
-    'checkpoint' => qw(darma-mpi-backend/checkpoint.git),
+    'vt'         => qw(DARMA-tasking/vt.git),
+    'detector'   => qw(DARMA-tasking/detector.git),
+    'checkpoint' => qw(DARMA-tasking/checkpoint.git),
     'kokkos'     => qw(kokkos/kokkos.git)
 );
 
